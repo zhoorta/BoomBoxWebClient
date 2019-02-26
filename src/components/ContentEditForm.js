@@ -14,15 +14,12 @@ import InputLabel from '@material-ui/core/InputLabel';
 export default class ContentEditForm extends React.Component {
 
   constructor(props) {
-    console.log('props',props)
     super(props);
-    
     this.state = {
       id: 0,
       title: '',
       tag: ''
     }
-
   }
   
   onEnter = () => {
@@ -30,19 +27,15 @@ export default class ContentEditForm extends React.Component {
   }  
 
   onClose = () => {
-    console.log('closing')
-    //this.setState({title: this.props.title,tag: this.props.tag})
   }
   
   onChangeTitle = (event) => {
 
     this.setState({title: event.target.value});
-    console.log(this.state)
   }
 
   onChangeTag = (event) => {
     this.setState({tag: event.target.value.toUpperCase()});
-    console.log(this.state)
   }
 
   closeDialog = () => {

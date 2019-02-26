@@ -90,10 +90,10 @@ class ContentListItem extends Component {
 
               <Grid container spacing={24}>
 
-                <Grid item xs={2}>
+                <Grid item sm={2}>
                   <Avatar src={this.props.content.thumbnail_url} className={classes.avatar} />
                 </Grid>
-                <Grid item xs={8}>
+                <Grid item sm={8}>
 
                   <Typography variant="h6" component="h6">
                     {this.props.content.title}
@@ -105,7 +105,7 @@ class ContentListItem extends Component {
 
                 </Grid>
 
-                <Grid item xs={2}>
+                <Grid item sm={2}>
 
                   <CardActions>
 

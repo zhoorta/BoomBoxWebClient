@@ -22,7 +22,15 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 const theme = createMuiTheme({
   typography: {
     useNextVariants: true,
-    fontFamily:'Oswald'
+    fontFamily:'Oswald',
+    h5: {
+      fontSize: "1.25rem",
+      lineHeight: 2
+    },
+    h6: {
+      fontSize: "1.1rem",
+      lineHeight: 2
+    }
   }
 });
 
@@ -37,8 +45,8 @@ const styles = theme => ({
     display: 'block', // Fix IE 11 issue.
     marginLeft: theme.spacing.unit * 3,
     marginRight: theme.spacing.unit * 3,
-    [theme.breakpoints.up(800 + theme.spacing.unit * 2)]: {
-      width: 800,
+    [theme.breakpoints.up(1000 + theme.spacing.unit * 2)]: {
+      width: 1000,
       marginLeft: 'auto',
       marginRight: 'auto',
     },
@@ -69,6 +77,10 @@ const styles = theme => ({
   },  
   logo: {
     height: 128
+  },  
+  alignRight: {
+   width: '100%', 
+   textAlign: 'right'
   },
 })
 
@@ -107,7 +119,6 @@ class App extends Component {
         if(Object.keys(this.state.tasks).length!==Object.keys(tasks).length) this.refreshTaggedContent()
         if(Object.keys(tasks).length === 0) this.clearRefreshTasksInterval()
         this.setState({ tasks: tasks }) 
-        console.log('refreshing tasks',this.state.tasks)
       })
   }
 
@@ -244,9 +255,11 @@ class App extends Component {
               
               { this.state.tagged_content.map((obj) => 
                 <Grid item xs={12} key={obj.tag}>
-                  <Typography variant="h6" component="h6">
-                    {obj.tag}
-                  </Typography>
+                  <div>
+                    <Typography variant="h5" component="h5" className={classes.alignRight}>
+                      {obj.tag}
+                    </Typography>
+                  </div>
                   <Paper className={classes.paperred}>
                     <ContentList content={obj.content} player={this.state.player} playContent={this.playContent} pauseContent={this.pauseContent} deleteContent={this.deleteContent} openContentEditForm={this.openContentEditForm} />
                   </Paper>                  
@@ -255,7 +268,7 @@ class App extends Component {
           
               { Object.keys(this.state.tasks).length > 0 ? 
                 <Grid item xs={12}>
-                  <Typography variant="h6" component="h6">
+                  <Typography variant="h5" component="h5" className={classes.alignRight}>
                     TASKS
                   </Typography>
                   <Paper className={classes.paperred}>
