@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 
 import ContentListItem from './ContentListItem.js'
-import ContentListItemTask from './ContentListItemTask.js'
 
 export default class ContentList extends Component {
 
@@ -19,13 +18,6 @@ export default class ContentList extends Component {
           
           )
         }
-        { this.props.tasks.map((obj) =>
-
-          <ContentListItemTask key={obj.id} content={obj} />
-          
-          )
-        }
-
       </div>
     )
   }

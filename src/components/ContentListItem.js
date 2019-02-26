@@ -130,7 +130,7 @@ class ContentListItem extends Component {
                     </div>
 
 
-                    <IconButton aria-label="Play" onClick={() => 
+                    <IconButton size="small" aria-label="Play" onClick={() => 
 
                       { this.props.player.id!==this.props.content.id ? this.props.playContent(this.props.content.id)
                          : this.props.player.status==='paused' ?

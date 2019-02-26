@@ -5,10 +5,8 @@ import { withStyles } from '@material-ui/core/styles';
 
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
 
 import ContentList from './components/ContentList.js'
-import TaskList from './components/TaskList.js'
 import YTForm from './components/YTForm.js'
 import ContentEditForm from './components/ContentEditForm.js'
 
@@ -77,6 +75,7 @@ class App extends Component {
     constructor() {
       super();
       this.state = {
+        content: [],
         tagged_content: [],
         tasks: [],
         player: {id: 0, url: '', status:''},
@@ -88,35 +87,23 @@ class App extends Component {
 
 
   componentDidMount() {
-
-    this.setRefreshTasksInterval()
     //this.refreshContent() 
     this.refreshTaggedContent() 
     this.refreshTasks()
-    
+    this.timer = setInterval(() => {this.refreshTasks()}, 5000)
   }
 
   componentWillUnmount() {
-    
+    clearInterval(this.timer);
   }
 
   refreshTasks = () => {        
     fetch(this.server + '/tasks')
       .then(response => response.json())
       .then(tasks => { 
-        if(Object.keys(this.state.tasks).length!==Object.keys(tasks).length) this.refreshTaggedContent()
-        if(Object.keys(tasks).length === 0) this.clearRefreshTasksInterval()
+        if(Object.keys(this.state.tasks).length!==Object.keys(tasks).length) this.refreshContent()
         this.setState({ tasks: tasks }) 
-        console.log('refreshing tasks',this.state.tasks)
       })
-  }
-
-  setRefreshTasksInterval = () => {
-    this.timer = setInterval(() => {this.refreshTasks()}, 5000)
-  }  
-
-  clearRefreshTasksInterval = () => {
-    clearInterval(this.timer)
   }
 
   refreshContent = () => {     
@@ -144,10 +131,7 @@ class App extends Component {
         headers:{'Content-Type': 'application/json'}
       })      
       .then(response => response.json())
-      .then(tasks => { 
-        this.setState({ tasks: tasks }) 
-        this.setRefreshTasksInterval()
-      })
+      .then(tasks => { this.setState({ tasks: tasks }) })
   }
 
   playContent = async (id) => {
@@ -174,7 +158,7 @@ class App extends Component {
   deleteContent = (id) => {
     fetch(this.server + '/content/' + id + '/delete')
       .then(response => response.json())
-      .then(tagged_content => { this.setState({ tagged_content: tagged_content }) })
+      .then(content => { this.setState({ content: content }) })
   }
 
   openContentEditForm = (content) => {
@@ -193,7 +177,7 @@ class App extends Component {
       headers:{'Content-Type': 'application/json'}
     })      
     .then(response => response.json())
-    .then(tagged_content => { this.setState({ tagged_content: tagged_content }) })
+    .then(content => { this.setState({ content: content }) })
 
     this.closeContentEditForm()
  
@@ -201,7 +185,7 @@ class App extends Component {
 
   render() {
 
-    const { classes } = this.props
+    const { classes } = this.props;
 
     return (
 
@@ -241,33 +225,14 @@ class App extends Component {
 
               </Grid>
 
-              
-              { this.state.tagged_content.map((obj) => 
-                <Grid item xs={12} key={obj.tag}>
-                  <Typography variant="h6" component="h6">
-                    {obj.tag}
-                  </Typography>
-                  <Paper className={classes.paperred}>
-                    <ContentList content={obj.content} player={this.state.player} playContent={this.playContent} pauseContent={this.pauseContent} deleteContent={this.deleteContent} openContentEditForm={this.openContentEditForm} />
-                  </Paper>                  
-                </Grid>
-              )}
-          
-              { Object.keys(this.state.tasks).length > 0 ? 
-                <Grid item xs={12}>
-                  <Typography variant="h6" component="h6">
-                    TASKS
-                  </Typography>
-                  <Paper className={classes.paperred}>
-                    <TaskList tasks={this.state.tasks} />
-                   </Paper>
-                </Grid>
-                : ''
-              }
-              
+              <Grid item xs={12} >
+                <Paper className={classes.paperred}>
+                  <ContentList content={this.state.content} tasks={this.state.tasks} player={this.state.player} playContent={this.playContent} pauseContent={this.pauseContent} deleteContent={this.deleteContent} openContentEditForm={this.openContentEditForm} />
+                </Paper>
+              </Grid>
 
               <Grid item xs={12}>
-                <Paper className={classes.paperred}>
+                <Paper className={classes.paper}>
                   <YTForm submitNewTask={this.submitNewTask}/>
                 </Paper>
               </Grid>

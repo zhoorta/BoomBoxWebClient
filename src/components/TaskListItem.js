@@ -26,7 +26,7 @@ const styles = theme => ({
 })
 
 
-class ContentListItemTask extends Component {
+class TaskListItem extends Component {
 
 
     render() {
@@ -69,8 +69,8 @@ class ContentListItemTask extends Component {
     }
 
 
-ContentListItemTask.propTypes = {
+TaskListItem.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(ContentListItemTask);
+export default withStyles(styles)(TaskListItem);
