@@ -3,18 +3,16 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 
-import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
+import Grid from '@material-ui/core/Grid'
+import Paper from '@material-ui/core/Paper'
 
-import ContentList from './components/ContentList.js'
+import Header from './components/Header.js'
+import TagList from './components/TagList.js'
 import TaskList from './components/TaskList.js'
+import LoginForm from './components/LoginForm.js'
 import YTForm from './components/YTForm.js'
 import ContentEditForm from './components/ContentEditForm.js'
 
-import { ReactComponent as Logo } from './logo.svg'
-
-import ReactAudioPlayer from 'react-audio-player';
 
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
@@ -89,6 +87,7 @@ class App extends Component {
     constructor() {
       super();
       this.state = {
+        auth: { authenticated: false, token: '' },
         tagged_content: [],
         tasks: [],
         player: {id: 0, url: '', status:''},
@@ -99,21 +98,14 @@ class App extends Component {
     }
 
 
-  componentDidMount() {
-
-    this.setRefreshTasksInterval()
-    //this.refreshContent() 
-    this.refreshTaggedContent() 
-    this.refreshTasks()
-    
+  async componentDidMount() {
+    const authenticated = localStorage.getItem('authenticated')
+    if(authenticated==='true') this.refreshToken(localStorage.getItem('key'))
   }
 
-  componentWillUnmount() {
-    
-  }
 
   refreshTasks = () => {        
-    fetch(this.server + '/tasks')
+    fetch(this.server + '/tasks', { headers: { 'x-access-token': this.state.auth.token }})
       .then(response => response.json())
       .then(tasks => { 
         if(Object.keys(this.state.tasks).length!==Object.keys(tasks).length) this.refreshTaggedContent()
@@ -131,16 +123,43 @@ class App extends Component {
   }
 
   refreshContent = () => {     
-    fetch(this.server + '/content/')
+    fetch(this.server + '/content/', { headers: { 'x-access-token': this.state.auth.token }})
       .then(response => response.json())
       .then(content => { this.setState({ content: content }) })
   }
 
 
   refreshTaggedContent = () => {     
-    fetch(this.server + '/content/sort/by/tag')
+    fetch(this.server + '/content/sort/by/tag', { headers: { 'x-access-token': this.state.auth.token }})
       .then(response => response.json())
       .then(tagged_content => { this.setState({ tagged_content: tagged_content }) })
+  }
+
+  refreshData = () => {
+    this.setRefreshTasksInterval() 
+    this.refreshTaggedContent() 
+    this.refreshTasks()
+  }
+
+  refreshToken = async (secret) => {     
+    console.log('refreshToken')
+    fetch(this.server + '/auth', {
+      method: 'POST', 
+      body: JSON.stringify({ secret: secret }),
+      headers:{'Content-Type': 'application/json'}
+    })      
+    .then(response => response.json())
+    .then(res => { 
+      this.setState({ auth: { authenticated: res.auth, token: res.token}})
+      
+      if(res.auth===true) {
+        localStorage.setItem('authenticated', res.auth)
+        localStorage.setItem('token', res.token)
+        localStorage.setItem('key', secret)
+
+        this.refreshData()
+      }
+    })
   }
 
 
@@ -152,38 +171,40 @@ class App extends Component {
       fetch(this.server + '/download', {
         method: 'POST', 
         body: JSON.stringify({ url: data.get('url') }),
-        headers:{'Content-Type': 'application/json'}
+        headers:{
+          'Content-Type': 'application/json',
+          'x-access-token': this.state.auth.token 
+        }
       })      
       .then(response => response.json())
-      .then(tasks => { 
-        this.setState({ tasks: tasks }) 
+      .then(res => { 
         this.setRefreshTasksInterval()
       })
   }
 
+  submitLogin = (event) => {
+
+      event.preventDefault()
+      const data = new FormData(event.target)
+      this.refreshToken(data.get('secret'))
+  }
+
   playContent = async (id) => {
 
-    if(this.state.player.id!==id) {
-      await this.setState({ player: {id: id, url: this.server + '/content/' + id, status: 'playing'}  })
-    }
-    else {
-      if(this.state.player.status==='paused') {
-        await this.setState({ player: {id: id, url: this.server + '/content/' + id, status: 'playing'}  })
-        this.rap.audioEl.play()
-      }
-      else await this.setState({ player: {id: id, url: this.server + '/content/' + id, status: 'paused'}  })
-    }
 
-    this.rap.audioEl.play()
+    if(this.state.player.id!==id) this.setState({ player: {id: id, url: this.server + '/content/' + id, status: 'playing'}  })
+    else {
+      if(this.state.player.status==='paused') this.setState({ player: {id: id, url: this.server + '/content/' + id, status: 'playing'}  })
+      else this.setState({ player: {id: id, url: this.server + '/content/' + id, status: 'paused'}  })
+    }
   }
 
   pauseContent = async (id) => {
     await this.setState({ player: {id: id, url: this.server + '/content/' + id, status: 'paused'}  })
-    this.rap.audioEl.pause()
   }
 
   deleteContent = (id) => {
-    fetch(this.server + '/content/' + id + '/delete')
+    fetch(this.server + '/content/' + id + '/delete', { headers: { 'x-access-token': this.state.auth.token }})
       .then(response => response.json())
       .then(tagged_content => { this.setState({ tagged_content: tagged_content }) })
   }
@@ -201,7 +222,10 @@ class App extends Component {
     fetch(this.server + '/content/update', {
       method: 'POST', 
       body: JSON.stringify({ content: content }),
-      headers:{'Content-Type': 'application/json'}
+      headers:{
+        'Content-Type': 'application/json',
+        'x-access-token': this.state.auth.token
+      }
     })      
     .then(response => response.json())
     .then(tagged_content => { this.setState({ tagged_content: tagged_content }) })
@@ -222,73 +246,43 @@ class App extends Component {
 
           <div className={classes.container}>
 
-            <Grid container spacing={24}>
+            { this.state.auth.authenticated===true ?
 
-              <Grid item xs={12}>
+              <Grid container spacing={24}>
 
-                <Paper className={classes.paperheader}>
-
-                  <Grid container spacing={24}>
-
-                    <Grid item xs={6}>
-                      <Logo className={classes.logo}/>
-                    </Grid>
-                    <Grid item xs={6}>
-
-                      <Grid className={classes.playergrid} container>
-                         <ReactAudioPlayer
-                            src={this.state.player.url}
-                            ref={(element) => { this.rap = element; }}
-                            controls
-                            autoplay
-                          />
-                      </Grid>
-
-                    </Grid>
-
-                  </Grid>
-
-                </Paper>
-
-              </Grid>
-
-              
-              { this.state.tagged_content.map((obj) => 
-                <Grid item xs={12} key={obj.tag}>
-                  <div>
-                    <Typography variant="h5" component="h5" className={classes.alignRight}>
-                      {obj.tag}
-                    </Typography>
-                  </div>
-                  <Paper className={classes.paperred}>
-                    <ContentList content={obj.content} player={this.state.player} playContent={this.playContent} pauseContent={this.pauseContent} deleteContent={this.deleteContent} openContentEditForm={this.openContentEditForm} />
-                  </Paper>                  
-                </Grid>
-              )}
-          
-              { Object.keys(this.state.tasks).length > 0 ? 
                 <Grid item xs={12}>
-                  <Typography variant="h5" component="h5" className={classes.alignRight}>
-                    TASKS
-                  </Typography>
-                  <Paper className={classes.paperred}>
-                    <TaskList tasks={this.state.tasks} />
-                   </Paper>
+                  <Header player={this.state.player}/>
                 </Grid>
-                : ''
-              }
-              
 
-              <Grid item xs={12}>
-                <Paper className={classes.paperred}>
-                  <YTForm submitNewTask={this.submitNewTask}/>
-                </Paper>
+                <TagList tagged_content={this.state.tagged_content} player={this.state.player} playContent={this.playContent} pauseContent={this.pauseContent} deleteContent={this.deleteContent} openContentEditForm={this.openContentEditForm} />
+                <TaskList tasks={this.state.tasks} />
+
+
+                <Grid item xs={12}>
+                  <Paper className={classes.paperred}>
+                    <YTForm submitNewTask={this.submitNewTask}/>
+                  </Paper>
+                </Grid>
+                
+
               </Grid>
-             
-            </Grid>
+
+            
+            :
+
+              <Grid container spacing={24}>
+                <Grid item xs={12}>
+                  <Paper className={classes.paperred}>
+                    <LoginForm submitLogin={this.submitLogin}/>
+                  </Paper>
+                </Grid>
+              </Grid>
+
+             }
+
 
           </div>
-
+          
 
           <ContentEditForm
             content={this.state.editcontentdialog.content}
@@ -296,7 +290,7 @@ class App extends Component {
             submitContentEditForm={this.submitContentEditForm}
             closeContentEditForm={this.closeContentEditForm}
           />
-
+          
         </div>
 
       </MuiThemeProvider>
