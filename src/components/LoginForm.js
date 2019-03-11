@@ -45,7 +45,7 @@ class LoginForm extends Component {
 
 	constructor(props) {
 		super(props);
-		this.state = { secret: 'f3a7b51f22ec14db3c548c22801bf19e97226336d6a6aa4b6be79db3526e925a' }
+		this.state = { secret: '' }
 	}
 
   	render() {

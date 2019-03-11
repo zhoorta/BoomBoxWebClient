@@ -94,7 +94,7 @@ class App extends Component {
         editcontentdialog: { open:false, content: {} }
       }
       this.server="http://172.104.149.192:1973"
-      //this.server="http://localhost:1973"
+      this.server="http://localhost:1973"
     }
 
 
@@ -182,6 +182,8 @@ class App extends Component {
       })
   }
 
+
+
   submitLogin = (event) => {
 
       event.preventDefault()
@@ -192,15 +194,15 @@ class App extends Component {
   playContent = async (id) => {
 
 
-    if(this.state.player.id!==id) this.setState({ player: {id: id, url: this.server + '/content/' + id, status: 'playing'}  })
+    if(this.state.player.id!==id) this.setState({ player: {id: id, url: this.server + '/content/download/' + id, status: 'playing'}  })
     else {
-      if(this.state.player.status==='paused') this.setState({ player: {id: id, url: this.server + '/content/' + id, status: 'playing'}  })
-      else this.setState({ player: {id: id, url: this.server + '/content/' + id, status: 'paused'}  })
+      if(this.state.player.status==='paused') this.setState({ player: {id: id, url: this.server + '/content/download/' + id, status: 'playing'}  })
+      else this.setState({ player: {id: id, url: this.server + '/content/download/' + id, status: 'paused'}  })
     }
   }
 
   pauseContent = async (id) => {
-    await this.setState({ player: {id: id, url: this.server + '/content/' + id, status: 'paused'}  })
+    await this.setState({ player: {id: id, url: this.server + '/content/download/' + id, status: 'paused'}  })
   }
 
   deleteContent = (id) => {
