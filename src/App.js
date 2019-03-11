@@ -93,8 +93,8 @@ class App extends Component {
         player: {id: 0, url: '', status:''},
         editcontentdialog: { open:false, content: {} }
       }
-      this.server="http://172.104.149.192:1973"
-      //this.server="http://localhost:1973"
+      this.server="https://172.104.149.192:1973"
+      //this.server="https://localhost:1973"
     }
 
 
