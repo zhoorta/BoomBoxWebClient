@@ -94,7 +94,7 @@ class App extends Component {
         editcontentdialog: { open:false, content: {} }
       }
       this.server="http://172.104.149.192:1973"
-      this.server="http://localhost:1973"
+      //this.server="http://localhost:1973"
     }
 
 
