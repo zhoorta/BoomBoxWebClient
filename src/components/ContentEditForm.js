@@ -30,12 +30,11 @@ export default class ContentEditForm extends React.Component {
   }
   
   onChangeTitle = (event) => {
-
     this.setState({title: event.target.value});
   }
 
   onChangeTag = (event) => {
-    this.setState({tag: event.target.value.toUpperCase()});
+    this.setState({tag: event.target.value});
   }
 
   closeDialog = () => {
