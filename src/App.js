@@ -16,7 +16,6 @@ import ContentEditForm from './components/ContentEditForm.js'
 
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 
-
 const theme = createMuiTheme({
   typography: {
     useNextVariants: true,
@@ -93,8 +92,8 @@ class App extends Component {
         player: {id: 0, url: '', status:''},
         editcontentdialog: { open:false, content: {} }
       }
-      this.server="https://172.104.149.192:1973"
-      //this.server="https://localhost:1973"
+      this.server="https://jambox.xyz:1974"
+      //this.server="http://localhost:1973"
     }
 
 
